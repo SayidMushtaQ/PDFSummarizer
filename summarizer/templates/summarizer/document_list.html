@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}My Documents - PDF Summarizer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">My Documents</h2>
+        
+        {% if documents %}
+            <div class="row">
+                {% for document in documents %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ document.title }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Uploaded: {{ document.uploaded_at|date:"F d, Y g:i A" }}
+                                    </small>
+                                </p>
+                                {% if document.summary %}
+                                    <p class="card-text">
+                                        {{ document.summary.summary_text|truncatewords:30 }}...
+                                    </p>
+                                    <a href="{% url 'summary_detail' document.id %}" class="btn btn-primary">View Summary</a>
+                                {% else %}
+                                    <p class="card-text text-warning">
+                                        <em>Summary not available</em>
+                                    </p>
+                                    <button class="btn btn-secondary" disabled>Processing...</button>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    File: {{ document.pdf_file.name|basename }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">No Documents Yet</h5>
+                        <p class="card-text">You haven't uploaded any PDF documents yet.</p>
+                        <a href="{% url 'upload_pdf' %}" class="btn btn-primary">Upload Your First PDF</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
