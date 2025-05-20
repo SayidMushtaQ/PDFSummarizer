@@ -1,53 +1,63 @@
-{% extends 'base.html' %}
-
-{% block title %}Upload PDF - PDF Summarizer{% endblock %}
+{% extends 'summarizer/base.html' %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <h2 class="mb-4">Upload PDF Document</h2>
-        
+<div class="row justify-content-center">
+    <div class="col-md-6">
         <div class="card">
+            <div class="card-header">
+                <h3>Upload PDF for Summarization</h3>
+            </div>
             <div class="card-body">
-                <form method="post" enctype="multipart/form-data">
+                <!-- Upload Form -->
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="{{ form.title.id_for_label }}" class="form-label">Document Title</label>
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
                         {{ form.title }}
-                        {% if form.title.errors %}
-                            <div class="text-danger">
-                                {{ form.title.errors }}
-                            </div>
-                        {% endif %}
                     </div>
-                    
                     <div class="mb-3">
                         <label for="{{ form.pdf_file.id_for_label }}" class="form-label">PDF File</label>
                         {{ form.pdf_file }}
-                        {% if form.pdf_file.errors %}
-                            <div class="text-danger">
-                                {{ form.pdf_file.errors }}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">Please select a PDF file to upload and summarize.</div>
                     </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Upload and Summarize</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        Upload and Summarize
+                    </button>
                 </form>
+
+                <!-- Simple Loading Animation -->
+                <div id="loadingContainer" class="d-none text-center mt-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5>Processing your PDF...</h5>
+                    <p class="text-muted">Please wait, this may take a few moments.</p>
+                </div>
             </div>
-        </div>
-        
-        <div class="mt-4">
-            <h5>Processing Information:</h5>
-            <ul class="list-unstyled">
-                <li>• The first upload may take longer as the AI model is loaded</li>
-                <li>• Larger PDFs require more processing time</li>
-                <li>• Only PDF files are supported</li>
-                <li>• The system works best with English text</li>
-            </ul>
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    // Simple validation
+    const titleInput = document.querySelector('#id_title');
+    const fileInput = document.querySelector('#id_pdf_file');
+    
+    if (!titleInput.value.trim()) {
+        e.preventDefault();
+        alert('Please enter a title.');
+        return;
+    }
+    
+    if (!fileInput.files.length) {
+        e.preventDefault();
+        alert('Please select a PDF file.');
+        return;
+    }
+    
+    // Show loading animation
+    document.getElementById('uploadForm').classList.add('d-none');
+    document.getElementById('loadingContainer').classList.remove('d-none');
+});
+</script>
 {% endblock %}

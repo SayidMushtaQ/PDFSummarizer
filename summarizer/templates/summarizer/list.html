@@ -1,0 +1,30 @@
+{% extends 'summarizer/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>All Documents</h2>
+        {% if documents %}
+            <div class="row">
+                {% for document in documents %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ document.title }}</h5>
+                                <p class="card-text">{{ document.summary|truncatewords:20 }}</p>
+                                <p class="text-muted">
+                                    <small>Uploaded: {{ document.uploaded_at|date:"M d, Y" }}</small>
+                                </p>
+                                <a href="{% url 'view_summary' document.pk %}" class="btn btn-primary">View Full Summary</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No documents uploaded yet.</p>
+            <a href="{% url 'upload_pdf' %}" class="btn btn-primary">Upload Your First PDF</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,28 +1,60 @@
-# Byte-compiled / cache
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
 
-# Virtual environment
+# Environment
+.env
+.venv/
 venv/
+ENV/
 env/
 *.env
 
-# Django-specific
-*.log
-*.pot
-*.pyc
+# Django
 db.sqlite3
+*.sqlite3
 media/
 staticfiles/
+static_root/
+*.log
 
-# IDEs and editors
+# VS Code
 .vscode/
+
+# macOS
+.DS_Store
+
+# PyCharm
 .idea/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Migrations (optional – keep if you don’t want to track them)
+**/migrations/*.py
+**/migrations/__pycache__/
 
-# Node (if using frontend)
-node_modules/
-build/
+# Byte-compiled / optimized / DLL files
+*.so
+*.dll
+*.dylib
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+.cache
+
+# Test reports
+junitxml.xml
+nosetests.xml
+test_*.log
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Docker
+*.pid

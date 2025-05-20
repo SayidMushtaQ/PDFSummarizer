@@ -1,64 +1,56 @@
 import PyPDF2
 from transformers import pipeline
-from django.conf import settings
-import os
+import torch
 
 class PDFSummarizer:
     def __init__(self):
-        # Initialize the summarization pipeline
-        self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+        # Using a lightweight summarization model
+        self.summarizer = pipeline(
+            "summarization",
+            model="facebook/bart-large-cnn",
+            device=0 if torch.cuda.is_available() else -1
+        )
     
-    def extract_text_from_pdf(self, pdf_path):
+    def extract_text_from_pdf(self, pdf_file):
         """Extract text from PDF file"""
         text = ""
         try:
-            with open(pdf_path, 'rb') as file:
-                pdf_reader = PyPDF2.PdfReader(file)
-                for page in pdf_reader.pages:
-                    text += page.extract_text()
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
         except Exception as e:
-            raise Exception(f"Error reading PDF: {str(e)}")
+            print(f"Error extracting text: {e}")
+            return None
         return text
     
-    def summarize_text(self, text, max_length=150, min_length=50):
-        """Generate summary using BART model"""
+    def summarize_text(self, text, max_length=150):
+        """Summarize the extracted text"""
+        if not text or len(text.strip()) < 50:
+            return "Text too short to summarize."
+        
         try:
-            # Split text into chunks if it's too long (BART has input limits)
-            max_chunk_length = 1024  # BART's max input length
-            chunks = [text[i:i+max_chunk_length] for i in range(0, len(text), max_chunk_length)]
+            # Split text into chunks if it's too long
+            max_input_length = 1024
+            if len(text) > max_input_length:
+                # Take first chunk for simplicity
+                text = text[:max_input_length]
             
-            summaries = []
-            for chunk in chunks:
-                if len(chunk.strip()) > 0:
-                    summary = self.summarizer(chunk, 
-                                            max_length=max_length, 
-                                            min_length=min_length, 
-                                            do_sample=False)
-                    summaries.append(summary[0]['summary_text'])
-            
-            # Combine all summaries
-            final_summary = ' '.join(summaries)
-            
-            # If we have multiple summaries, summarize them again
-            if len(summaries) > 1:
-                final_summary = self.summarizer(final_summary, 
-                                               max_length=max_length, 
-                                               min_length=min_length, 
-                                               do_sample=False)[0]['summary_text']
-            
-            return final_summary
+            summary = self.summarizer(
+                text,
+                max_length=max_length,
+                min_length=50,
+                do_sample=False
+            )
+            return summary[0]['summary_text']
         except Exception as e:
-            raise Exception(f"Error generating summary: {str(e)}")
+            print(f"Error summarizing text: {e}")
+            return "Error generating summary."
     
-    def process_pdf(self, pdf_path):
-        """Complete PDF processing pipeline"""
-        # Extract text
-        text = self.extract_text_from_pdf(pdf_path)
+    def process_pdf(self, pdf_file):
+        """Main method to process PDF and return summary"""
+        text = self.extract_text_from_pdf(pdf_file)
+        if not text:
+            return "Could not extract text from PDF."
         
-        if not text.strip():
-            raise Exception("No text could be extracted from the PDF")
-        
-        # Generate summary
         summary = self.summarize_text(text)
-        
-        return text, summary
+        return summary
